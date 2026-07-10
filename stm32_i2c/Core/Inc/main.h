@@ -61,7 +61,7 @@ void Error_Handler(void);
 #define LED0_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define LED0_TOGGLE_PERIOD   2000u
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
