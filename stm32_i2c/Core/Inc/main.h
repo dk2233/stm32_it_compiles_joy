@@ -60,8 +60,11 @@ void Error_Handler(void);
 #define LED0_Pin GPIO_PIN_5
 #define LED0_GPIO_Port GPIOB
 
+extern I2C_HandleTypeDef hi2c1;
 /* USER CODE BEGIN Private defines */
 #define LED0_TOGGLE_PERIOD   2000u
+
+#define I2C_SLAVE_ADDR     10u
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
