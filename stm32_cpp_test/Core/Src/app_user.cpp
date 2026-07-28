@@ -1,3 +1,6 @@
+#include "etl/array.h"
+#include "etl/string_view.h"
+#include "etl/utility.h"
 #include "main.h" // dla definicji pinów i htim1
 #include "port_class.h"
 #include <cstddef>
@@ -30,9 +33,9 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 
 
 #define ONE_LINE_6x8   30u
+#define HEAP_NUMBER_OF_INFO_LINE 3
 void PrintMallinfo() {
     std::array<char, ONE_LINE_6x8> message_a;
-    message_a.fill(0);
 
     struct mallinfo mi = mallinfo();
 
@@ -44,27 +47,39 @@ void PrintMallinfo() {
         printf("wolna na stercie:     %d B\r\n", mi.fordblks); // Zwolnione przez free/delete (gotowe do ponownego użycia)
     }                                                             //
 
-    std::string_view heap1{"used heap:"};
-    
-    std::copy(heap1.begin() , heap1.end(), message_a.begin());
-    size_t offset = heap1.size();
+    etl::array<etl::pair<etl::string_view, size_t>, HEAP_NUMBER_OF_INFO_LINE> messages = {
+        etl::make_pair("Heap:", mi.arena),
+        etl::make_pair("Used:", mi.uordblks),
+        etl::make_pair("Free:", mi.fordblks),
+    };
 
-    // 2. WSTAWIAMY LICZBĘ w konkretne miejsce bufora (od 'offset')
-    auto [ptr, ec] = std::to_chars(message_a.data() + offset, message_a.data() + message_a.size(), mi.uordblks);
-    
-    if (ec == std::errc{}) {
-        offset = ptr - message_a.data(); // Aktualizujemy długość całkowitą
+    int dy = 10, i = 0;
+    for(auto &p : messages)
+    {
+        message_a.fill(0);
         
-        // Dopisujemy końcówkę
-        std::string_view suffix = " bytes";
-        std::copy(suffix.begin(), suffix.end(), message_a.data() + offset);
-        offset += suffix.size();
+        etl::copy(p.first.begin() , p.first.end(), message_a.begin());
+        size_t offset = p.first.size();
 
-        // 3. TWORZYMY STRING_VIEW na gotowy bufor
-        std::string_view result(message_a.data(), offset);
-    screen->OledPrint(result, 2 , 0 , Font_6x8, Black);
+        // 2. WSTAWIAMY LICZBĘ w konkretne miejsce bufora (od 'offset')
+        auto [ptr, ec] = std::to_chars(message_a.data() + offset, message_a.data() + message_a.size(), p.second );
+
+        if (ec == std::errc{}) {
+            offset = ptr - message_a.data(); // Aktualizujemy długość całkowitą
+
+            // Dopisujemy końcówkę
+            std::string_view suffix = " bytes";
+            std::copy(suffix.begin(), suffix.end(), message_a.data() + offset);
+            offset += suffix.size();
+
+            // 3. TWORZYMY STRING_VIEW na gotowy bufor
+            std::string_view result(message_a.data(), offset);
+
+            screen->OledPrint(result, 2 , i*dy , Font_6x8, Black);
+            i++;
+        }
         
-}
+    }
 }
 
 extern "C" int _write(int file, char *ptr, int len) {
