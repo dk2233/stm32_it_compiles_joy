@@ -1,3 +1,6 @@
 [submodule "stm32-ssd1306"]
 	path = stm32-ssd1306
 	url = git@github.com:afiskon/stm32-ssd1306.git
+[submodule "etl"]
+	path = etl
+	url = git@github.com:ETLCPP/etl.git

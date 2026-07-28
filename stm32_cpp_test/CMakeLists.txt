@@ -36,23 +36,34 @@ enable_language(C ASM)
 add_executable(${CMAKE_PROJECT_NAME})
 
 # Add STM32CubeMX generated sources
-add_subdirectory(cmake/stm32cubemx)
+add_subdirectory(cmake/stm32cubemx
+    ../etl
+)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
+    ../stm32-ssd1306/ssd1306
 )
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/app_user.cpp
+    Core/Src/app_callbacks.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../stm32-ssd1306/ssd1306/ssd1306.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../stm32-ssd1306/ssd1306/ssd1306_fonts.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../stm32-ssd1306/ssd1306/ssd1306_tests.c
+
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     USB_DEVICE/App
+    ../stm32-ssd1306/ssd1306
+    ../etl/include
+    PRIVATE etl::etl
 )
 
 # Add project symbols (macros)
